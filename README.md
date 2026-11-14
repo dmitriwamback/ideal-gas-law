@@ -4,23 +4,27 @@
 
 $$ (P + \frac{an^2}{V^2})(V - nb) = nRT $$
 
+<p>Then isolate the pressure:</p>
+
+$$ P = \frac{nRT}{(V - nb)} - \frac{an^2}{V^2} $$
+
 <p>Where:</p>
 
-1. $P$ is the pressure (bar)
+1. $P$ is the pressure ($bar = 10^5Pa$)
 
-2. $V$ is the volume (L)
+2. $V$ is the volume ($L$)
 
-3. $n$ is the number of moles (mol)
+3. $n$ is the number of moles ($mol$)
 
-4. $R$ is the gas constant
+4. $R$ is the gas constant ($\frac{0.0831446 L⋅bar}{K⋅mol}$)
 
-5. $T$ is the temperature (C)
+5. $T$ is the temperature ($K$)
 
 6. $a$ and $b$ are substance-specific constants. $a$ describes the attractive forces whereas $b$ describes the physical volume occupied by the gas.
 
 <p></p>
 
-In this repo, we treat $nRT$ as a constant.
+*In this repo, we treat $nRT$ as a constant.
 
 <p></p>
 

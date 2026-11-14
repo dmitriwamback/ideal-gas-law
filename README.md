@@ -26,7 +26,7 @@ In this repo, we treat $nRT$ as a constant.
 
 Table of gases and their $a$ and $b$ values.
 
-| Substance | Formula | $a (bar L^2/mol^2)$ | $b (L/mol)$ |
+| Substance | Formula | $a (bar \cdot L^2/mol^2)$ | $b (L/mol)$ |
 | --- | --- | --- | --- |
 | Helium | $He$ | 0.0346 | 0.02380 |
 | Hydrogen | $H_2$ | 0.2453 | 0.02650 |

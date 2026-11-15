@@ -24,15 +24,15 @@ public:
     SoftBody();
 
     void Step(WorldSettings worldSettings, float dt);
-    void Render(Shader shader);
+    //void Render(Shader shader);
 
 private:
     void ApplyGravity(std::vector<glm::vec2>& forces, const glm::vec2& gravity);
-    void ApplyPressure(std::vector<glm::vec2>& forces);
-    void ApplyPerimeterSpring(std::vector<glm::vec2>& forces);
-    void ApplyBendingSpring(std::vector<glm::vec2>& forces);
+    //void ApplyPressure(std::vector<glm::vec2>& forces);
+    //void ApplyPerimeterSpring(std::vector<glm::vec2>& forces);
+    //void ApplyBendingSpring(std::vector<glm::vec2>& forces);
     void ResolveGroundCollision(float groundY);
-    void Integrate(const std::vector<glm::vec2>& forces, float dt);
+    //void Integrate(const std::vector<glm::vec2>& forces, float dt);
 
     float ComputeArea() const;
     static float SignedAngle(const glm::vec2& previous, const glm::vec2& current, const glm::vec2& next);

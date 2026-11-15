@@ -8,9 +8,9 @@ void SoftBody::Step(WorldSettings worldSettings, float dt) {
     std::vector<glm::vec2> forces(positions.size(), glm::vec2(0.0f));
 
     ApplyGravity(forces, worldSettings.gravity);
-    ApplyPressure(forces);
-    ApplyBendingSpring(forces);
-    Integrate(forces, dt);
+    //ApplyPressure(forces);
+    //ApplyBendingSpring(forces);
+    //Integrate(forces, dt);
     ResolveGroundCollision(worldSettings.ground);
 }
 

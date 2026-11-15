@@ -98,13 +98,32 @@ $$ \vec{p}_i = \vec{p}_{i-1} + \vec{v}_iΔt$$
 
 Table of gases and their $a$ and $b$ values.
 
-| Substance | Formula | $a \ (bar \cdot L^2/mol^2)$ | $b \ (L/mol)$ |
-| --- | --- | --- | --- |
-| Helium | $He$ | 0.0346 | 0.02380 |
-| Hydrogen | $H_2$ | 0.2453 | 0.02650 |
-| Nitrogen | $N_2$ | 1.3700 | 0.03870 |
-| Oxygen | $O_2$ | 1.3820 | 0.03186 |
-| Carbon Dioxide | $CO_2$ | 3.6580 | 0.04286 |
-| Ammonia | $NH_3$ | 4.2250 | 0.03713 |
-| Water Vapor | $H_2O$ | 5.5370 | 0.03049 |
-| Methane | $CH_4$ | 2.3000 | 0.04301 |
+| Gas | Formula | $a \ (bar \cdot L^2/mol^2)$ | $b \ (L/mol)$ |
+| --- | --- | --- | --- | 
+| Hydrogen | H₂ | 0.2476 | 0.02661 |
+| Helium | He | 0.0346 | 0.0238 |
+| Nitrogen | N₂ | 1.370 | 0.0387 |
+| Oxygen | O₂ | 1.382 | 0.03186 |
+| Carbon Dioxide | CO₂ | 3.640 | 0.04267 |
+| Water Vapor | H₂O | 5.536 | 0.03049 |
+| Methane | CH₄ | 2.283 | 0.04278 |
+| Ammonia | NH₃ | 4.225 | 0.0371 |
+| Sulfur Dioxide | SO₂ | 6.803 | 0.05636 |
+| Chlorine | Cl₂ | 6.579 | 0.05622 |
+| Neon | Ne | 0.2135 | 0.01709 |
+| Argon | Ar | 1.355 | 0.03201 |
+| Krypton | Kr | 2.349 | 0.03978 |
+| Xenon | Xe | 4.250 | 0.05105 |
+| Radon | Rn | 6.601 | 0.06239 |
+| Carbon Monoxide | CO | 1.505 | 0.03985 |
+| Nitrous Oxide | N₂O | 3.832 | 0.04415 |
+| Hydrogen Sulfide | H₂S | 4.544 | 0.04339 |
+| Phosgene | COCl₂ | 9.171 | 0.0831 |
+| Ethylene | C₂H₄ | 4.612 | 0.0582 |
+| Acetylene | C₂H₂ | 4.516 | 0.0522 |
+| Propane | C₃H₈ | 8.779 | 0.08445 |
+| Butane | C₄H₁₀ | 14.66 | 0.1226 |
+| Pentane | C₅H₁₂ | 19.26 | 0.146 |
+| Hexane | C₆H₁₄ | 24.71 | 0.1735 |
+| Heptane | C₇H₁₆ | 31.06 | 0.2049 |
+| Octane | C₈H₁₈ | 37.88 | 0.2374 |

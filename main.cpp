@@ -5,7 +5,6 @@
 int main() {
 
     float demoMassKg = 1.0f;
-
     float heliumMolarMassKg = calculateMolarMass(gasComposition.at(HeliumGas)) / 1000.0f;
     float nitrousOxideMolarMassKg = calculateMolarMass(gasComposition.at(NitrousOxide)) / 1000.0f;
 

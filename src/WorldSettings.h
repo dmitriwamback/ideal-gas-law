@@ -132,41 +132,43 @@ inline std::map<GasType, Gas> gasAttractiveForces = {
 
 
 // Helps to compute the molar mass and the number of moles in a given substance of mass m
-inline std::map<GasType, std::vector<ElementType>> gasComposition = {
-    {GasType::HydrogenGas,      {Hydrogen, Hydrogen}}, // H2
-    {GasType::HeliumGas,        {Helium}}, // He
-    {GasType::NitrogenGas,      {Nitrogen, Nitrogen}}, // N2
-    {GasType::OxygenGas,        {Oxygen, Oxygen}}, // O2
-    {GasType::CarbonDioxide,    {Carbon, Oxygen, Oxygen}}, // CO2
-    {GasType::WaterVapor,       {Hydrogen, Hydrogen, Oxygen}}, // H2O
-    {GasType::Methane,          {Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // CH4
-    {GasType::Ammonia,          {Nitrogen, Hydrogen, Hydrogen, Hydrogen}}, // NH3
-    {GasType::SulfurDioxide,    {Sulfur, Oxygen, Oxygen}}, // SO2
-    {GasType::ChlorineGas,      {Chlorine, Chlorine}}, // Cl2
-    {GasType::NeonGas,          {Neon}}, // Ne
-    {GasType::ArgonGas,         {Argon}}, // Ar
-    {GasType::KryptonGas,       {Krypton}}, // Kr
-    {GasType::XenonGas,         {Xenon}}, // Xe
-    {GasType::RadonGas,         {Radon}}, // Rn
-    {GasType::CarbonMonoxide,   {Carbon, Oxygen}}, // CO
-    {GasType::NitrousOxide,     {Nitrogen, Nitrogen, Oxygen}}, // N2O
-    {GasType::HydrogenSulfide,  {Hydrogen, Hydrogen, Sulfur}}, // H2S
-    {GasType::Phosgene,         {Carbon, Oxygen, Chlorine, Chlorine}}, // COCl2
-    {GasType::Ethylene,         {Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C2H4
-    {GasType::Acetylene,        {Carbon, Carbon, Hydrogen, Hydrogen}}, // C2H2
-    {GasType::Propane,          {Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C3H8
-    {GasType::Butane,           {Carbon, Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C4H10
-    {GasType::Pentane,          {Carbon, Carbon, Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C5H12
-    {GasType::Hexane,           {Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C6H14
-    {GasType::Heptane,          {Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}}, // C7H16
-    {GasType::Octane,           {Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Carbon, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen, Hydrogen}} // C8H18
+inline std::map<GasType, std::vector<std::map<ElementType, int>>> gasComposition = {
+    {GasType::HydrogenGas,      {{{Hydrogen, 2}}}},
+    {GasType::HeliumGas,        {{{Helium,   1}}}},
+    {GasType::NitrogenGas,      {{{Nitrogen, 2}}}},
+    {GasType::OxygenGas,        {{{Oxygen,   2}}}},
+    {GasType::CarbonDioxide,    {{{Carbon,   1}, {Oxygen, 2}}}},
+    {GasType::WaterVapor,       {{{Hydrogen, 2}, {Oxygen, 1}}}},
+    {GasType::Methane,          {{{Carbon,   1}, {Hydrogen, 4}}}},
+    {GasType::Ammonia,          {{{Nitrogen, 1}, {Hydrogen, 3}}}},
+    {GasType::SulfurDioxide,    {{{Sulfur,   1}, {Oxygen, 1}}}},
+    {GasType::ChlorineGas,      {{{Chlorine, 2}}}},
+    {GasType::NeonGas,          {{{Neon,     1}}}},
+    {GasType::ArgonGas,         {{{Argon,    1}}}},
+    {GasType::KryptonGas,       {{{Krypton,  1}}}},
+    {GasType::XenonGas,         {{{Xenon,    1}}}},
+    {GasType::RadonGas,         {{{Radon,    1}}}},
+    {GasType::CarbonMonoxide,   {{{Carbon,   1}, {Oxygen, 1}}}},
+    {GasType::NitrousOxide,     {{{Nitrogen, 2}, {Oxygen, 1}}}},
+    {GasType::HydrogenSulfide,  {{{Hydrogen, 2}, {Sulfur, 1}}}},
+    {GasType::Phosgene,         {{{Carbon,   1}, {Oxygen, 1}, {Chlorine, 2}}}},
+    {GasType::Ethylene,         {{{Carbon,   2}, {Hydrogen, 4}}}},
+    {GasType::Acetylene,        {{{Carbon,   2}, {Hydrogen, 2}}}},
+    {GasType::Propane,          {{{Carbon,   3}, {Hydrogen, 8}}}},
+    {GasType::Butane,           {{{Carbon,   4}, {Hydrogen, 10}}}},
+    {GasType::Pentane,          {{{Carbon,   5}, {Hydrogen, 12}}}},
+    {GasType::Hexane,           {{{Carbon,   6}, {Hydrogen, 14}}}},
+    {GasType::Heptane,          {{{Carbon,   7}, {Hydrogen, 16}}}},
+    {GasType::Octane,           {{{Carbon,   8}, {Hydrogen, 18}}}},
 };
 
-inline float calculateMolarMass(std::vector<ElementType> _elements) {
-    
+inline float calculateMolarMass(std::vector<std::map<ElementType, int>> _elements) {
+
     float total = 0;
-    for (ElementType type : _elements) {
-        total += elements[type].molarMass;
+    for (const auto& composition : _elements) {
+        for (const auto& [element, count] : composition) {
+            total += elements.at(element).molarMass * count;
+        }
     }
     return total;
 }

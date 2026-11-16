@@ -16,7 +16,8 @@ add_executable(ideal_gas_law main.cpp
         src/physics/Collision.h
         src/objects/Constraints.cpp
         src/objects/Constraints.h
-        src/WorldSettings.h)
+        src/WorldSettings.h
+        src/MathUtil.h)
 
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)

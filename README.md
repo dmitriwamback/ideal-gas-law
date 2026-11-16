@@ -3,6 +3,7 @@
 
 ## How to run
 
+
 ## Theory
 
 ### Van der Waals equation
@@ -17,11 +18,11 @@ $$ P = \frac{nRT}{V - nb} - \frac{an^2}{V^2} $$
 
 <p>Where:</p>
 
-1. $P$ is the pressure ($bar = 10^5Pa$)
+1. $P$ is the pressure ($bar = 10^5 Pa$)
 
-2. $V$ is the volume ($L$)
+2. $V$ is the volume ($L$), here the volume enclosed by the 3D mesh
 
-3. $n$ is the number of moles ($mol$)
+3. $n$ is the number of moles ($mol$).
 
 4. $R$ is the gas constant ($\frac{0.0831446 L⋅bar}{K⋅mol}$)
 
@@ -31,64 +32,175 @@ $$ P = \frac{nRT}{V - nb} - \frac{an^2}{V^2} $$
 
 <p></p>
 
-Then, with this pressure we find $ΔP = P - P_{ext}$ where $P_{ext}$ is the atmospheric pressure ($1 \ atm$ or $1.01325 \ bar$).
+<p>The simulation computes everything in SI units so that pressure × area comes out directly in newtons. The table values convert as:</p>
+
+$$ a \ (Pa \cdot m^6/mol^2) = 0.1 \cdot a \ (bar \cdot L^2/mol^2) $$
+
+$$ b \ (m^3/mol) = 10^{-3} \cdot b \ (L/mol) $$
+
+$$ R = 8.314 \ J/(mol \cdot K) $$
 
 <p></p>
 
-To calculate the force exerted by the pressure, the normals of the 2D shape must be calculated. Assume $\vec{p}_i$ and $\vec{p}_{i+1}$ are adjacent vertices going in the counter clockwise direction. The edge $\vec{e}$ is defined $\vec{e} = \vec{p}_{i+1} - \vec{p}_i$ and thus the normal is $\vec{n} = (\vec{e}_y, \ -\vec{e}_x)$.
+### Gas mixtures
+
+For a mixture of species $k$ with $n_k$ moles each, the one-fluid mixing rules are:
 
 <p></p>
 
-As the simulation runs, this force is calculated between two adjacent edges:
+$$ n = \sum_k n_k \qquad b_{tot} = \sum_k n_k b_k \qquad a_{tot} = \left(\sum_k n_k \sqrt{a_k}\right)^2 $$
 
-$$ \vec{F}_i = \vec{F}_{i-1} + \frac{ΔP}{2}\vec{n}_i $$
+<p>and the pressure becomes:</p>
 
-$$ \vec{F}_j = \vec{F}_{j-1} + \frac{ΔP}{2}\vec{n}_j $$
-
-<p></p>
-
-Such that $i, j$ correspond to two individual adjacent normals.
+$$ P = \frac{nRT}{V - b_{tot}} - \frac{a_{tot}}{V^2} $$
 
 <p></p>
 
-For each neighboring pair, calculate $\vec{d} = \vec{p}_{i+1} - \vec{p}_i$, $L = |\vec{d}|$, and $\hat{d} = \vec{d}/L$. With these, we can calculate the spring force with damping:
+For a single gas this is the same as the equation above ($b_{tot} = nb$, $a_{tot} = an^2$).
+
+<p></p>
+
+### Net pressure
+
+<p>The skin only feels the difference between the inside pressure and the pressure of the surrounding air:</p>
+
+$$ ΔP = P - P_{ext} $$
+
+where $P_{ext}$ is atmospheric pressure ($1 \ atm = 101325 \ Pa$) and is held constant. If $ΔP > 0$ the skin is pushed outward, and if $ΔP < 0$ it is pushed inward. $V - b_{tot}$ is clamped to a small positive minimum so $P$ never divides by zero.
+
+<p></p>
+
+### The mesh
+
+The balloon is a closed triangle mesh (an icosphere). Each vertex $i$ has a position $\vec{p}_i$, a velocity $\vec{v}_i$, a mass $m_i$, and an accumulated force $\vec{F}_i$. Every triangle is stored with its vertices in counter clockwise order when viewed from outside, so the normals point outward.
+
+<p></p>
+
+### Volume
+
+The enclosed volume is the sum of signed tetrahedra formed between the origin and every triangle (divergence theorem). For a triangle with vertices $\vec{p}_0, \vec{p}_1, \vec{p}_2$:
+
+$$ V = \frac{1}{6} \sum_{triangles} \vec{p}_0 \cdot (\vec{p}_1 \times \vec{p}_2) $$
+
+If $V$ is negative, the triangles are wound inside out.
+
+<p></p>
+
+### Pressure force
+
+<p>For every triangle, the (unnormalized) normal is:</p>
+
+$$ \vec{N} = \frac{1}{2}(\vec{p}_1 - \vec{p}_0) \times (\vec{p}_2 - \vec{p}_0) $$
+
+<p></p>
+
+Its direction is the outward normal and its length is the area of the triangle, so $ΔP \ \vec{N}$ is already pressure × area. It is not normalized. The force is split equally between the three vertices of the triangle:
+
+<p></p>
+
+$$ \vec{F}_{0} \mathrel{+}= \frac{ΔP}{3}\vec{N} \qquad \vec{F}_{1} \mathrel{+}= \frac{ΔP}{3}\vec{N} \qquad \vec{F}_{2} \mathrel{+}= \frac{ΔP}{3}\vec{N} $$
+
+<p></p>
+
+Here $\mathrel{+}=$ means accumulate. Each vertex is shared by several triangles, so it collects a contribution from each one. All forces are set to $\vec{0}$ at the start of every substep.
+
+<p></p>
+
+### Spring force
+
+The skin is held together by springs along every unique edge of the mesh (each edge is shared by two triangles but gets only one spring). For an edge between vertices $i$ and $j$, calculate $\vec{d} = \vec{p}_j - \vec{p}_i$, $L = |\vec{d}|$, and $\hat{d} = \vec{d}/L$. The spring force with damping is:
+
+<p></p>
 
 $$ \vec{F}_s = [k_s(L - L_0) + k_d(\vec{v}_j - \vec{v}_i) \cdot \hat{d}]\hat{d} $$
 
-<p></p>
-
-And we can compute a force that pulls each point toward the midpoint of its neighbors:
-
-$$ \vec{F}_m = k_b(\frac{\vec{p}_{i-1} + \vec{p}_{i+1}}{2} -\vec{p_i} ) $$
-
-<p></p>
-
-Where:
+<p>Where:</p>
 
 1. $k_s$ is the spring constant.
-2. $k_d$ is the damping spring constant.
-3. $L_0$ is the length of the edge between $\vec{p}_i$ and $\vec{p}_{i+1}$ (fixed).
+
+2. $k_d$ is the damping constant. The dot product keeps only the relative velocity along the edge, so only the change in edge length is damped.
+
+3. $L_0$ is the rest length of that edge. It is stored once when the mesh is built (the initial length of each edge) and never changes. $L$ is recomputed from the current positions every substep.
 
 <p></p>
 
-This force is applied to both $\vec{p}_i$ and in the opposite for $\vec{p}_j$ such that:
+<p>The force is applied equal and opposite to the two endpoints (Newton's third law):</p>
 
-$$ \vec{F}_{i+1} = \vec{F}_{i} + \vec{F}_s + \vec{F_g} + \vec{F}_m $$
-$$ \vec{F}_{j+1} = \vec{F}_{j} - \vec{F}_s + \vec{F_g} + \vec{F}_m $$
-
-<p></p>
-
-Both $\vec{F}_{i+1}$ and $\vec{F}_{j+1}$ represent $\vec{F}_{net}$ ($m\vec{a}$) for both points $i,j$ in the current frame.
+$$ \vec{F}_i \mathrel{+}= \vec{F}_s \qquad \vec{F}_j \mathrel{-}= \vec{F}_s $$
 
 <p></p>
 
-With our $\vec{F}_{net}$ for both objects, we can modify the positions of the vertices:
+### Smoothing force (optional)
+
+To stop the skin from crumpling, each vertex can be pulled toward the average position of its neighbors. If $\mathcal{N}(i)$ is the set of vertices connected to $i$ by an edge:
 
 <p></p>
 
-$$ \vec{v}_i = \vec{v}_{i-1} + \frac{\vec{F}}{m}Δt $$
+$$ \vec{F}_m = k_b\left(\frac{1}{|\mathcal{N}(i)|}\sum_{j \in \mathcal{N}(i)} \vec{p}_j - \vec{p}_i\right) $$
 
-$$ \vec{p}_i = \vec{p}_{i-1} + \vec{v}_iΔt$$
+<p></p>
+
+This acts on one vertex only, so it is not equal and opposite. On a sphere the neighbor average sits slightly inside the surface, so it shrinks the equilibrium size a little. Keep $k_b$ small or leave it out, since the triangulated edge springs already resist shearing.
+
+<p></p>
+
+### Gravity, buoyancy and drag
+
+<p>These are external forces. They act on each vertex individually, so they are added once per vertex, not once per spring.</p>
+
+$$ \vec{F}_g = m_i\vec{g}, \qquad \vec{g} = (0, -9.81, 0) \ m/s^2 $$
+
+<p></p>
+
+Because $P_{ext}$ is constant, the outside air pushes equally on every triangle and the net force cancels, so there is no lift. Buoyancy has to be added explicitly, using the volume from above and spread over the $N$ vertices:
+
+<p></p>
+
+$$ \vec{F}_b = \frac{\rho_{air} V g}{N}\hat{y} \qquad (\rho_{air} \approx 1.2 \ kg/m^3) $$
+
+<p></p>
+
+The mass of the gas is not on the mesh, so it is added to the vertex masses: $m_i = (m_{skin} + m_{gas})/N$. Then the gas weight and the buoyancy both act on the balloon, and a gas lighter than air rises while a heavier gas sinks.
+
+<p>Drag (linear, to reach a terminal velocity):</p>
+
+$$ \vec{F}_{d} = -c\vec{v}_i $$
+
+<p></p>
+
+### Integration
+
+<p>Every vertex ends up with one net force, the sum of everything accumulated on it this substep:</p>
+
+$$ \vec{F}_{net,i} = \vec{F}_{pressure,i} + \vec{F}_{s,i} + \vec{F}_{m,i} + \vec{F}_{g,i} + \vec{F}_{b,i} + \vec{F}_{d,i} $$
+
+<p></p>
+
+Then, using semi-implicit Euler with a small $Δt$ (several substeps per frame):
+
+<p></p>
+
+$$ \vec{v}_i \leftarrow \vec{v}_i + \frac{\vec{F}_{net,i}}{m_i}Δt $$
+
+$$ \vec{p}_i \leftarrow \vec{p}_i + \vec{v}_iΔt $$
+
+<p>The new velocity is used to update the position.</p>
+
+<p></p>
+
+<p></p>
+
+### Critical point
+
+The critical point is not needed by the simulation loop, only $a$ and $b$ are. It is useful as a phase indicator and a sanity check:
+
+<p></p>
+
+$$ T_c = \frac{8a}{27Rb} \qquad P_c = \frac{a}{27b^2} \qquad V_c = 3nb $$
+
+<p></p>
+
+Above $T_c$ the fluid responds smoothly. Below $T_c$, $P(V)$ has a region where pressure rises with volume, which is unstable, so the balloon can pop or collapse. A pressure clamp or a Maxwell construction is needed there. Near $T_c$ the balloon is very floppy, since a tiny change in pressure causes a large change in volume.
 
 <p></p>
 
@@ -96,7 +208,7 @@ $$ \vec{p}_i = \vec{p}_{i-1} + \vec{v}_iΔt$$
 
 <p></p>
 
-Table of gases and their $a$ and $b$ values.
+Table of gases and their $a$ and $b$ values (convert to SI before use, see above).
 
 | Gas | Formula | $a \ (bar \cdot L^2/mol^2)$ | $b \ (L/mol)$ |
 | --- | --- | --- | --- | 

@@ -4,6 +4,8 @@
 
 #ifndef IDEAL_GAS_LAW_MATHUTIL_H
 #define IDEAL_GAS_LAW_MATHUTIL_H
+#include <iostream>
+
 #include "WorldSettings.h"
 
 struct Mixture {
@@ -18,22 +20,26 @@ struct Component {
     double massFraction;
 };
 
-double molesOf(GasType g, double massKg) {
+inline double molesOf(GasType g, double massKg) {
 
     float molarMass = calculateMolarMass(gasComposition.at(g));
-    return massKg / (molarMass * 1000.0);
+    return massKg * 1000.0 / molarMass;
 }
 
-Mixture makeMixture(const std::vector<Component>& mix, double massKg) {
+inline Mixture makeMixture(const std::vector<Component>& mix, double massKg) {
 
-    Mixture m{};
+    double sum = 0;
+    for (const Component& c : mix) sum += c.massFraction;
+    assert(std::abs(sum - 1.0) < 1e-9 && "mass fractions must sum to 1");
 
-    for (Component& component : mix) {
-        double mass = massKg * component.massFraction;
-        double moles = molesOf(component.type, mass);
+    double n = 0, b_tot = 0, a_tot = 0;
 
-
+    for (const Component& c : mix) {
+        double nk = molesOf(c.type, massKg * c.massFraction);
+        n += nk;
+        b_tot += nk * vanDerWaalsConstants.at(c.type).b / 1000.0;
+        a_tot += nk * std::sqrt(vanDerWaalsConstants.at(c.type).a * 0.1);
     }
+    return Mixture{ n, a_tot * a_tot, b_tot, massKg };
 }
-
 #endif //IDEAL_GAS_LAW_MATHUTIL_H

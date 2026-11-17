@@ -6,45 +6,69 @@
 #define IDEAL_GAS_LAW_SOFTBODY_H
 #include <vector>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include "../WorldSettings.h"
+#include "../MathUtil.h"
 #include "../shader/Shader.h"
 
 class SoftBody {
 public:
-    std::vector<glm::vec2> positions;
-    std::vector<glm::vec2> velocities;
-    std::vector<float> massPoints;
+    SoftBody(std::vector<Vertex> initial, std::vector<Triangle> tris, const Mixture& mix, const SoftbodyParams& params, double T0);
 
-    std::vector<float> restEdgeLengths;
-    std::vector<float> restAngles;
-    float restArea;
-    float nRT;
+    static SoftBody MakeIcosphere(int subdivisions, double radius, glm::dvec3 center, const Mixture& mix, const SoftbodyParams& params, double T0);
 
-    SoftBody();
+    void Step(double dt, int substeps);
+    void Reset();
+    void Render(Shader& shader);
+    void SetTemperatureTarget(double T) { Ttarget = T; }
+    void SetMixture(const Mixture& m);
+    void Grab(int vertex, glm::dvec3 target);
+    void Release() { grabbed = -1; }
 
-    void Step(WorldSettings worldSettings, float dt);
-    //void Render(Shader shader);
+    void UpdateVertices();
+    const std::vector<Vertex>& Vertices() const { return vertices; }
+    const std::vector<Triangle>& Triangles() const { return triangles; }
+    double Volume()      const { return V; }
+    double Pressure()    const { return P; }
+    double Temperature() const { return T; }
 
 private:
-    void ApplyGravity(std::vector<glm::vec2>& forces, const glm::vec2& gravity);
-    //void ApplyPressure(std::vector<glm::vec2>& forces);
-    //void ApplyPerimeterSpring(std::vector<glm::vec2>& forces);
-    //void ApplyBendingSpring(std::vector<glm::vec2>& forces);
-    void ResolveGroundCollision(float groundY);
-    //void Integrate(const std::vector<glm::vec2>& forces, float dt);
 
-    float ComputeArea() const;
-    static float SignedAngle(const glm::vec2& previous, const glm::vec2& current, const glm::vec2& next);
+    void UpdateTemperature(double h);
+    void ComputeVolumeAndPressure();
+    void ClearForces();
+    void AddPressureForces();
+    void AddSpringForces();
+    void AddVertexForces();
+    void Integrate(double h);
+    void ResolveCollisions();
 
-    uint32_t vertexArrayObject, vertexBufferObject, indexBufferObject;
+    void BuildEdges();
+    void BuildNeighbors();
 
-    float pressureMultiplier = 1.0f;
-    float edgeStiffness = 800.0f;
-    float bendingStiffness = 40.0f;
-    float damping = 0.995f;
-    float restitution = 0.3f;
-    float friction = 0.85f;
+    std::vector<Vertex> initialVertices;
+    std::vector<Triangle> triangles;
+    std::vector<Edge> edges;
+    std::vector<std::vector<int>> neighbors;
+    double V0 = 0;
+
+    std::vector<glm::dvec3> p, v, F;
+    double vertexMass = 0;
+
+    Mixture mix;
+    double T, Ttarget;
+    double V = 0, P = 0, dP = 0;
+
+    std::vector<Vertex> vertices;
+
+    SoftbodyParams params;
+    int grabbed = -1;
+    glm::dvec3 grabTarget{0.0};
+
+    uint32_t vertexArrayObject  = 0;
+    uint32_t vertexBufferObject = 0;
+    uint32_t elementBufferObject = 0;
 };
 
 

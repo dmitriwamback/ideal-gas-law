@@ -5,11 +5,37 @@
 #ifndef IDEAL_GAS_LAW_WORLDSETTINGS_H
 #define IDEAL_GAS_LAW_WORLDSETTINGS_H
 #include <map>
+#include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 
 struct WorldSettings {
     glm::vec2 gravity = glm::vec2(0.0f, -980.0f);
     float ground = 0.0f;
+};
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 uv;
+};
+
+struct Triangle {
+    int a, b, c;
+};
+
+struct Edge {
+    int i, j;
+    double L0;
+};
+
+struct SoftbodyParams {
+    double ks = 50.0, kd = 0.5, kb = 0.0, drag = 0.05;
+    double skinMassKg = 0.05;
+    double pExt = 101325.0, rhoAir = 1.2;
+    glm::dvec3 gravity{0.0, -9.81, 0.0};
+    double maxDeltaP = 5e4;
+    double restitution = 0.1, friction = 0.3;
+    double tau = 1.5;
 };
 
 struct Element {

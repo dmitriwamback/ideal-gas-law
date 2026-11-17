@@ -6,8 +6,8 @@
 #define IDEAL_GAS_LAW_RENDERER_H
 #include <glm/vec2.hpp>
 
-#include "WorldSettings.h"
-#include "objects/SoftBody.h"
+#include "../WorldSettings.h"
+#include "../objects/SoftBody.h"
 
 class Renderer {
 public:

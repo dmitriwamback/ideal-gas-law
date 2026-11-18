@@ -54,3 +54,13 @@ void Shader::SetVector3(const char *variableName, const glm::vec3 &vector) {
     int location = glGetUniformLocation(program, variableName);
     glUniform3fv(location, 1, &vector[0]);
 }
+
+void Shader::SetVector2(const char *variableName, const glm::vec2 &vector) {
+    int location = glGetUniformLocation(program, variableName);
+    glUniform2fv(location, 1, &vector[0]);
+}
+
+void Shader::SetInt(const char *variableName, int value) {
+    int location = glGetUniformLocation(program, variableName);
+    glUniform1i(location, value);
+}

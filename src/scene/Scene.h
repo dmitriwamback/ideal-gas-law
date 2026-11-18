@@ -4,21 +4,25 @@
 
 #ifndef IDEAL_GAS_LAW_SCENE_H
 #define IDEAL_GAS_LAW_SCENE_H
-#include "Camera.h"
-#include "../objects/Cube.h"
-#include "../objects/SoftBody.h"
 
+#include "Camera.h"
+#include "../buffer/Framebuffer.h"
+#include "../objects/Cube.h"
+#include "../objects/Quad.h"
+#include "../objects/SoftBody.h"
 
 class Scene {
 public:
     Scene();
     std::unique_ptr<SoftBody> softBody;
     std::vector<Cube> cubes;
-    Shader shader;
+    Shader shader, quadShader, deferredRenderingShader;
+    Quad quad;
 
     void SetSoftbody(SoftBody& softBody);
     void Populate(Cube& cube);
-    void Render(const Camera& camera, double dt);
+    void RenderScene(const Camera& camera, double dt);
+    void RenderComposite(std::unique_ptr<Framebuffer>& framebuffer, const Camera& camera, GLFWwindow* window);
 };
 
 

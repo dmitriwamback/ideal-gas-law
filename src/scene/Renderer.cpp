@@ -65,13 +65,13 @@ void Renderer::Initialize() {
         cube.position = glm::vec3(-2.0f * pow(-1, i), -i * 8, 9 * pow(-1, i+1));
         scene->Populate(cube);
     }
+
+    framebuffer = std::make_unique<Framebuffer>(Framebuffer(window));
 }
 
 void Renderer::GameLoop() {
 
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         double currentTime = glfwGetTime();
         deltaTime = float(currentTime - lastFrameTime);
@@ -101,7 +101,14 @@ void Renderer::GameLoop() {
         camera.Update(movement, up, down, window, deltaTime);
         camera.UpdateLookAtMatrix();
 
-        scene->Render(camera, 1/120.0f);
+        framebuffer->Bind(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+        scene->RenderScene(camera, 1/120.0f);
+        framebuffer->Unbind();
+
+        scene->RenderComposite(framebuffer, camera, window);
 
         glfwPollEvents();
         glfwSwapBuffers(window);

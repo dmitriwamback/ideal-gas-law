@@ -13,6 +13,7 @@
 #include "Scene.h"
 #include "../WorldSettings.h"
 #include "../objects/SoftBody.h"
+#include "../buffer/Framebuffer.h"
 
 class Renderer {
 public:
@@ -24,6 +25,7 @@ private:
     Camera camera;
 
     GLFWwindow *window;
+    std::unique_ptr<Framebuffer> framebuffer;
 
     float deltaTime;
     float lastFrameTime;

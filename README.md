@@ -9,7 +9,7 @@ cmake --build .
 ./ideal_gas_law
 ```
 
-### Changing gas composition
+### Changing gas composition (found in src/scene/Renderer.cpp)
 
 ```c++
 
@@ -27,7 +27,9 @@ SoftbodyParams params;
 SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(-2, 15, -5), m, params, 298.0);
 
 ```
-In the above case, the radius/sphere size changes depending on composition
+In the above case, the radius/sphere size changes depending on composition.
+
+The first element describes which gas is used and the second determines how much in kg the gas contributes.
 
 In any case, ensure that for $k$ species,
 

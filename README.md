@@ -12,7 +12,6 @@ cmake --build .
 ### Changing gas composition (found in src/scene/Renderer.cpp)
 
 ```c++
-
 double gasMassKg = 3000.0;
 std::vector<Component> components = {
     {GasType::HeliumGas, 0.025},
@@ -25,7 +24,6 @@ Mixture m = makeMixture(components, gasMassKg);
 SoftbodyParams params;
 
 SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(-2, 15, -5), m, params, 298.0);
-
 ```
 In the above case, the radius/sphere size changes depending on composition.
 

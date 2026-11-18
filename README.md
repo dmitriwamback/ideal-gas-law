@@ -10,7 +10,7 @@
 
 <p>Van der Waals equation for gases:</p>
 
-$$ (P + \frac{an^2}{V^2})(V - nb) = nRT $$
+$$ \left(P + \frac{an^2}{V^2}\right)(V - nb) = nRT $$
 
 <p>Then isolate the pressure:</p>
 

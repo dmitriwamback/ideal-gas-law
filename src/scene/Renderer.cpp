@@ -42,15 +42,18 @@ void Renderer::Initialize() {
     }
     glEnable(GL_DEPTH_TEST);
 
-    double gasMassKg = 700.0;
+    double gasMassKg = 3000.0;
     std::vector<Component> components = {
-        {GasType::TungstenHexafluoride, 1.0}
+        {GasType::HeliumGas, 0.025},
+        {GasType::CarbonDioxide, 0.675},
+        {GasType::NitrousOxide, 0.1},
+        {GasType::KryptonGas, 0.2}
     };
     Mixture m = makeMixture(components, gasMassKg);
 
     SoftbodyParams params;
 
-    SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(0, 15, -5), m, params, 298.0);
+    SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(-2, 15, -5), m, params, 298.0);
 
     const double dt = deltaTime;
 
@@ -60,8 +63,8 @@ void Renderer::Initialize() {
 
     for (int i = 0; i < 10; i++) {
         Cube cube = Cube();
-        cube.scale = glm::vec3(15.0f, 1.0f, 7.0f);
-        cube.rotation = glm::vec3(20.0f * pow(-1, i), 0.0f, -10 * pow(-1, i));
+        cube.scale = glm::vec3(20.0f, 1.0f, 9.0f);
+        cube.rotation = glm::vec3(30.0f * pow(-1, i), 0.0f, 0);
         cube.position = glm::vec3(-2.0f * pow(-1, i), -i * 8, 9 * pow(-1, i+1));
         scene->Populate(cube);
     }

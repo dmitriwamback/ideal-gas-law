@@ -3,6 +3,37 @@
 
 ## How to run
 
+```shell
+cmake CMakeLists.txt
+cmake --build .
+./ideal_gas_law
+```
+
+### Changing gas composition
+
+```c++
+
+double gasMassKg = 3000.0;
+std::vector<Component> components = {
+    {GasType::HeliumGas, 0.025},
+    {GasType::CarbonDioxide, 0.675},
+    {GasType::NitrousOxide, 0.1},
+    {GasType::KryptonGas, 0.2}
+};
+Mixture m = makeMixture(components, gasMassKg);
+
+SoftbodyParams params;
+
+SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(-2, 15, -5), m, params, 298.0);
+
+```
+In the above case, the radius/sphere size changes depending on composition
+
+In any case, ensure that for $k$ species,
+
+$$ \sum_k C(k) = 1, \qquad C(k) = composition \ of \ k $$
+
+Or the program will throw an error
 
 ## Theory
 

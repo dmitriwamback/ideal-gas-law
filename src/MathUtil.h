@@ -23,7 +23,6 @@ struct Component {
     double massFraction;
 };
 
-// Solves P(V) = pExt on the gas branch by bisection.
 inline double EquilibriumVolume(const Mixture& m, double T, double pExt) {
 
     double R = 8.314;
@@ -31,15 +30,17 @@ inline double EquilibriumVolume(const Mixture& m, double T, double pExt) {
     auto f = [&](double V) {
         return m.n * R * T / (V - m.b_tot) - m.a_tot / (V * V) - pExt;
     };
+
     double guess = m.n * R * T / pExt;
     double lo = std::max(0.5 * guess, m.b_tot * 1.001);
     double hi = 2.0 * guess;
-    if (f(lo) < 0.0 || f(hi) > 0.0)
-        throw std::runtime_error("EquilibriumVolume: no gas-branch root bracketed "
-                                 "(near critical or liquid-like, needs a smarter solver)");
+
+    if (f(lo) < 0.0 || f(hi) > 0.0) {
+        throw std::runtime_error("EquilibriumVolume: no gas-branch root bracketed " "(near critical or liquid-like, needs a smarter solver)");
+    }
     for (int i = 0; i < 200; ++i) {
         double mid = 0.5 * (lo + hi);
-        (f(mid) > 0.0 ? lo : hi) = mid;   // f falls with V on the gas branch
+        (f(mid) > 0.0 ? lo : hi) = mid;
     }
     return 0.5 * (lo + hi);
 }
@@ -71,9 +72,9 @@ inline glm::mat4 ComputeModelMatrix(const glm::vec3 &position, const glm::vec3 &
 
     glm::mat4 translation = glm::translate(glm::mat4(1.0f), position);
 
-    glm::mat4 xRotation = glm::rotate(glm::mat4(1.0f), rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 yRotation = glm::rotate(glm::mat4(1.0f), rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 zRotation = glm::rotate(glm::mat4(1.0f), rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 xRotation = glm::rotate(glm::mat4(1.0f), rotation.x * 3.14159265f / 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 yRotation = glm::rotate(glm::mat4(1.0f), rotation.y * 3.14159265f / 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 zRotation = glm::rotate(glm::mat4(1.0f), rotation.z * 3.14159265f / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
     glm::mat4 rot = xRotation * yRotation * zRotation;
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), size);

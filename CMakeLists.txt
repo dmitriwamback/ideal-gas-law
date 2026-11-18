@@ -20,7 +20,9 @@ add_executable(ideal_gas_law main.cpp
         src/scene/Camera.h
         src/shader/ShaderSources.h
         src/objects/Cube.cpp
-        src/objects/Cube.h)
+        src/objects/Cube.h
+        src/objects/Framebuffer.cpp
+        src/objects/Framebuffer.h)
 
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)

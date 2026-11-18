@@ -35,37 +35,36 @@ void Renderer::Initialize() {
 
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
+
+    
     if (err != GLEW_OK) {
         std::cerr << "GLEW init failed: " << glewGetErrorString(err) << std::endl;
     }
     glEnable(GL_DEPTH_TEST);
 
-    double gasMassKg = 30.0;
+    double gasMassKg = 700.0;
     std::vector<Component> components = {
-        {GasType::UraniumHexafluoride, 0.05},
-        {GasType::HeliumGas, 0.05},
-        {GasType::TungstenHexafluoride, 0.9}
+        {GasType::TungstenHexafluoride, 1.0}
     };
     Mixture m = makeMixture(components, gasMassKg);
 
     SoftbodyParams params;
 
-    SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(0), m, params, 273.0);
+    SoftBody softBody = SoftBody::MakeEquilibriumIcosphere(2, glm::dvec3(0, 15, -5), m, params, 298.0);
 
     const double dt = deltaTime;
-    softBody.Step(dt, softBody.RecommendedSubsteps(dt));
 
     camera = Camera();
     scene = std::make_unique<Scene>();
     scene->SetSoftbody(softBody);
 
-
-    Cube cube = Cube();
-    cube.position = glm::vec3(0.0f, -10.25f, 0.0f);
-    cube.scale = glm::vec3(4.0f, 0.25f, 4.0f);
-    cube.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    scene->Populate(cube);
+    for (int i = 0; i < 10; i++) {
+        Cube cube = Cube();
+        cube.scale = glm::vec3(15.0f, 1.0f, 7.0f);
+        cube.rotation = glm::vec3(20.0f * pow(-1, i), 0.0f, -10 * pow(-1, i));
+        cube.position = glm::vec3(-2.0f * pow(-1, i), -i * 8, 9 * pow(-1, i+1));
+        scene->Populate(cube);
+    }
 }
 
 void Renderer::GameLoop() {

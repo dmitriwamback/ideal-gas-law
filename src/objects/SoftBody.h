@@ -6,6 +6,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 
+#include "Cube.h"
 #include "../WorldSettings.h"
 #include "../MathUtil.h"
 #include "../shader/Shader.h"
@@ -23,7 +24,7 @@ public:
     SoftBody& operator=(const SoftBody&) = delete;
     SoftBody(SoftBody&& o) noexcept;
 
-    void Step(double dt, int substeps);
+    void Step(double dt, int substeps, std::vector<Cube>& cubes);
     int  RecommendedSubsteps(double dt) const;
     void Reset();
     void Render(Shader& shader);
@@ -43,6 +44,9 @@ public:
     double MaxStrain() const;   // max |L/L0 - 1| over all edges
 
 private:
+
+    void ResolveCollisions(const std::vector<Cube>& cubes);
+    void Push(size_t i, const glm::dvec3& n, double depth);
     void UpdateTemperature(double h);
     void ComputeVolume();
     void ComputePressure(double h);   // h = 0: no damping update (for display)

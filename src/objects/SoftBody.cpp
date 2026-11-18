@@ -233,7 +233,8 @@ int SoftBody::RecommendedSubsteps(double dt) const {
     return std::clamp(n, 1, 100);
 }
 
-void SoftBody::Step(double dt, int substeps) {
+void SoftBody::Step(double dt, int substeps, std::vector<Cube>& cubes) {
+
     if (dt <= 0.0 || substeps <= 0) return;
     const double h = dt / static_cast<double>(substeps);
 
@@ -248,7 +249,7 @@ void SoftBody::Step(double dt, int substeps) {
         AddVertexForces();
 
         Integrate(h);
-        ResolveCollisions();
+        ResolveCollisions(cubes);
     }
 
     ComputeVolume();
@@ -463,4 +464,36 @@ void SoftBody::Render(Shader& shader) {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
+}
+
+void SoftBody::Push(size_t i, const glm::dvec3& n, double depth) {
+    p[i] += n * depth;
+
+    double vn = glm::dot(v[i], n);
+    if (vn >= 0.0) return;
+
+    glm::dvec3 vt = v[i] - vn * n;
+    double e = (-vn > 0.5) ? params.restitution : 0.0;
+    v[i] = vt - e * vn * n;
+
+    double vtLen = glm::length(vt);
+    if (vtLen > 1e-12) {
+        v[i] -= (vt / vtLen) * std::min(vtLen, params.friction * (-vn) * (1.0 + e));
+    }
+}
+
+void SoftBody::ResolveCollisions(const std::vector<Cube>& cubes) {
+
+    if (cubes.empty()) return;
+
+    double depth;
+    glm::dvec3 n;
+    for (size_t i = 0; i < p.size(); ++i) {
+
+        for (const Cube& c : cubes) {
+            if (c.Collide(p[i], params.collisionMargin, depth, n)) {
+                Push(i, n, depth);
+            }
+        }
+    }
 }

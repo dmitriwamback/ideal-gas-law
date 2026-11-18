@@ -18,7 +18,7 @@ public:
 
     void SetSoftbody(SoftBody& softBody);
     void Populate(Cube& cube);
-    void Render(Camera camera, double dt);
+    void Render(const Camera& camera, double dt);
 };
 
 

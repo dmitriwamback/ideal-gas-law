@@ -12,6 +12,7 @@ Scene::Scene() {
 }
 
 void Scene::Populate(Cube &cube) {
+    cube.UpdateCollider();
     cubes.push_back(cube);
 }
 
@@ -19,9 +20,9 @@ void Scene::SetSoftbody(SoftBody& body) {
     this->softBody = std::make_unique<SoftBody>(std::move(body));
 }
 
-void Scene::Render(Camera camera, double dt) {
+void Scene::Render(const Camera& camera, double dt) {
 
-    softBody->Step(dt, softBody->RecommendedSubsteps(dt));
+    softBody->Step(dt, softBody->RecommendedSubsteps(dt), cubes);
 
     shader.Use();
     shader.SetMatrix4("projection", camera.projection);

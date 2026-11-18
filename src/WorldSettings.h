@@ -48,6 +48,8 @@ struct SoftbodyParams {
     double tau = 1.5;
     double kMouse = 50.0;
     double floorY = -10.0;
+
+    double collisionMargin = 0.02;
 };
 
 struct Element {

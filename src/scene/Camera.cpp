@@ -8,8 +8,8 @@
 #include "../WorldSettings.h"
 
 Camera::Camera() {
-    position = glm::vec3(-15.0f, 0.0f, 0.0f);
-    lookDirection = glm::vec3(0.0f, 0.0f, 1.0f);
+    position = glm::vec3(-15.0f, 10.0f, 0.0f);
+    lookDirection = glm::vec3(1.0f, 0.0f, 0.0f);
 
     projection = glm::perspective(3.14159265358f/2.0f, 3.0f/2.0f, 0.1f, 1000.0f);
     upDirection = glm::vec3(0.0f, 1.0f, 0.0f);

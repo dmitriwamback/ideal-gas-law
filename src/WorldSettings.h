@@ -9,7 +9,6 @@
 #include <glm/vec2.hpp>
 
 struct WorldSettings {
-    glm::vec2 gravity = glm::vec2(0.0f, -980.0f);
     float ground = 0.0f;
 };
 
@@ -29,13 +28,26 @@ struct Edge {
 };
 
 struct SoftbodyParams {
-    double ks = 50.0, kd = 0.5, kb = 0.0, drag = 0.05;
+    bool autoSkin = true;
+    double targetOverpressure = 500.0;
+    double maxStrain = 0.02;
+    double ks = 0.0, kd = 0.0;
+    double kb = 0.0;
+
     double skinMassKg = 0.05;
-    double pExt = 101325.0, rhoAir = 1.2;
+    double pExt = 101325.0;
+    double rhoAir = 1.2;
     glm::dvec3 gravity{0.0, -9.81, 0.0};
     double maxDeltaP = 5e4;
+
+    double drag = 0.0;
+    double dragCd = 1.0;
+    double bulkDampingRatio = 0.3;
+
     double restitution = 0.1, friction = 0.3;
     double tau = 1.5;
+    double kMouse = 50.0;
+    double floorY = -10.0;
 };
 
 struct Element {
@@ -49,15 +61,16 @@ struct Gas {
 };
 
 enum class GasType {
-    HydrogenGas,        HeliumGas,      NitrogenGas,
-    OxygenGas,          CarbonDioxide,  WaterVapor,
-    Methane,            Ammonia,        SulfurDioxide,
-    ChlorineGas,        NeonGas,        ArgonGas,
-    KryptonGas,         XenonGas,       RadonGas,
-    CarbonMonoxide,     NitrousOxide,   HydrogenSulfide,
-    Phosgene,           Ethylene,       Acetylene,
-    Propane,            Butane,         Pentane,
-    Hexane,             Heptane,        Octane
+    HydrogenGas,            HeliumGas,              NitrogenGas,
+    OxygenGas,              CarbonDioxide,          WaterVapor,
+    Methane,                Ammonia,                SulfurDioxide,
+    ChlorineGas,            NeonGas,                ArgonGas,
+    KryptonGas,             XenonGas,               RadonGas,
+    CarbonMonoxide,         NitrousOxide,           HydrogenSulfide,
+    Phosgene,               Ethylene,               Acetylene,
+    Propane,                Butane,                 Pentane,
+    Hexane,                 Heptane,                Octane,
+    UraniumHexafluoride,    TungstenHexafluoride,   Ozone
 };
 
 enum class ElementType {
@@ -127,65 +140,71 @@ inline const std::map<ElementType, Element> elements = {
 };
 
 inline const std::map<GasType, Gas> vanDerWaalsConstants = {
-    {GasType::HydrogenGas,      {0.2476f, 0.02661f}},
-    {GasType::HeliumGas,        {0.0346f, 0.0238f}},
-    {GasType::NitrogenGas,      {1.370f, 0.0387f}},
-    {GasType::OxygenGas,        {1.382f, 0.03186f}},
-    {GasType::CarbonDioxide,    {3.640f, 0.04267f}},
-    {GasType::WaterVapor,       {5.536f, 0.03049f}},
-    {GasType::Methane,          {2.283f, 0.04278f}},
-    {GasType::Ammonia,          {4.225f, 0.0371f}},
-    {GasType::SulfurDioxide,    {6.803f, 0.05636f}},
-    {GasType::ChlorineGas,      {6.579f, 0.05622f}},
-    {GasType::NeonGas,          {0.2135f, 0.01709f}},
-    {GasType::ArgonGas,         {1.355f, 0.03201f}},
-    {GasType::KryptonGas,       {2.349f, 0.03978f}},
-    {GasType::XenonGas,         {4.250f, 0.05105f}},
-    {GasType::RadonGas,         {6.601f, 0.06239f}},
-    {GasType::CarbonMonoxide,   {1.505f, 0.03985f}},
-    {GasType::NitrousOxide,     {3.832f, 0.04415f}},
-    {GasType::HydrogenSulfide,  {4.544f, 0.04339f}},
-    {GasType::Phosgene,         {9.171f, 0.0831f}},
-    {GasType::Ethylene,         {4.612f, 0.0582f}},
-    {GasType::Acetylene,        {4.516f, 0.0522f}},
-    {GasType::Propane,          {8.779f, 0.08445f}},
-    {GasType::Butane,           {14.66f, 0.1226f}},
-    {GasType::Pentane,          {19.26f, 0.146f}},
-    {GasType::Hexane,           {24.71f, 0.1735f}},
-    {GasType::Heptane,          {31.06f, 0.2049f}},
-    {GasType::Octane,           {37.88f, 0.2374f}}
+    {GasType::HydrogenGas,          {0.2476f, 0.02661f}},
+    {GasType::HeliumGas,            {0.0346f, 0.0238f}},
+    {GasType::NitrogenGas,          {1.370f, 0.0387f}},
+    {GasType::OxygenGas,            {1.382f, 0.03186f}},
+    {GasType::CarbonDioxide,        {3.640f, 0.04267f}},
+    {GasType::WaterVapor,           {5.536f, 0.03049f}},
+    {GasType::Methane,              {2.283f, 0.04278f}},
+    {GasType::Ammonia,              {4.225f, 0.0371f}},
+    {GasType::SulfurDioxide,        {6.803f, 0.05636f}},
+    {GasType::ChlorineGas,          {6.579f, 0.05622f}},
+    {GasType::NeonGas,              {0.2135f, 0.01709f}},
+    {GasType::ArgonGas,             {1.355f, 0.03201f}},
+    {GasType::KryptonGas,           {2.349f, 0.03978f}},
+    {GasType::XenonGas,             {4.250f, 0.05105f}},
+    {GasType::RadonGas,             {6.601f, 0.06239f}},
+    {GasType::CarbonMonoxide,       {1.505f, 0.03985f}},
+    {GasType::Ozone,                {3.545f, 0.0487f}},
+    {GasType::NitrousOxide,         {3.832f, 0.04415f}},
+    {GasType::HydrogenSulfide,      {4.544f, 0.04339f}},
+    {GasType::Phosgene,             {9.171f, 0.0831f}},
+    {GasType::Ethylene,             {4.612f, 0.0582f}},
+    {GasType::Acetylene,            {4.516f, 0.0522f}},
+    {GasType::Propane,              {8.779f, 0.08445f}},
+    {GasType::TungstenHexafluoride, {13.25f, 0.1063f}},
+    {GasType::Butane,               {14.66f, 0.1226f}},
+    {GasType::UraniumHexafluoride,  {16.01f, 0.1128f}},
+    {GasType::Pentane,              {19.26f, 0.146f}},
+    {GasType::Hexane,               {24.71f, 0.1735f}},
+    {GasType::Heptane,              {31.06f, 0.2049f}},
+    {GasType::Octane,               {37.88f, 0.2374f}},
 };
 
 
 // Helps to compute the molar mass and the number of moles in a given substance of mass m
 inline const std::map<GasType, std::map<ElementType, int>> gasComposition = {
-    {GasType::HydrogenGas,      {{ElementType::Hydrogen, 2}}},
-    {GasType::HeliumGas,        {{ElementType::Helium,   1}}},
-    {GasType::NitrogenGas,      {{ElementType::Nitrogen, 2}}},
-    {GasType::OxygenGas,        {{ElementType::Oxygen,   2}}},
-    {GasType::CarbonDioxide,    {{ElementType::Carbon,   1}, {ElementType::Oxygen, 2}}},
-    {GasType::WaterVapor,       {{ElementType::Hydrogen, 2}, {ElementType::Oxygen, 1}}},
-    {GasType::Methane,          {{ElementType::Carbon,   1}, {ElementType::Hydrogen, 4}}},
-    {GasType::Ammonia,          {{ElementType::Nitrogen, 1}, {ElementType::Hydrogen, 3}}},
-    {GasType::SulfurDioxide,    {{ElementType::Sulfur,   1}, {ElementType::Oxygen, 2}}},
-    {GasType::ChlorineGas,      {{ElementType::Chlorine, 2}}},
-    {GasType::NeonGas,          {{ElementType::Neon,     1}}},
-    {GasType::ArgonGas,         {{ElementType::Argon,    1}}},
-    {GasType::KryptonGas,       {{ElementType::Krypton,  1}}},
-    {GasType::XenonGas,         {{ElementType::Xenon,    1}}},
-    {GasType::RadonGas,         {{ElementType::Radon,    1}}},
-    {GasType::CarbonMonoxide,   {{ElementType::Carbon,   1}, {ElementType::Oxygen, 1}}},
-    {GasType::NitrousOxide,     {{ElementType::Nitrogen, 2}, {ElementType::Oxygen, 1}}},
-    {GasType::HydrogenSulfide,  {{ElementType::Hydrogen, 2}, {ElementType::Sulfur, 1}}},
-    {GasType::Phosgene,         {{ElementType::Carbon,   1}, {ElementType::Oxygen, 1}, {ElementType::Chlorine, 2}}},
-    {GasType::Ethylene,         {{ElementType::Carbon,   2}, {ElementType::Hydrogen, 4}}},
-    {GasType::Acetylene,        {{ElementType::Carbon,   2}, {ElementType::Hydrogen, 2}}},
-    {GasType::Propane,          {{ElementType::Carbon,   3}, {ElementType::Hydrogen, 8}}},
-    {GasType::Butane,           {{ElementType::Carbon,   4}, {ElementType::Hydrogen, 10}}},
-    {GasType::Pentane,          {{ElementType::Carbon,   5}, {ElementType::Hydrogen, 12}}},
-    {GasType::Hexane,           {{ElementType::Carbon,   6}, {ElementType::Hydrogen, 14}}},
-    {GasType::Heptane,          {{ElementType::Carbon,   7}, {ElementType::Hydrogen, 16}}},
-    {GasType::Octane,           {{ElementType::Carbon,   8}, {ElementType::Hydrogen, 18}}},
+    {GasType::HydrogenGas,          {{ElementType::Hydrogen, 2}}},
+    {GasType::HeliumGas,            {{ElementType::Helium,   1}}},
+    {GasType::NitrogenGas,          {{ElementType::Nitrogen, 2}}},
+    {GasType::OxygenGas,            {{ElementType::Oxygen,   2}}},
+    {GasType::CarbonDioxide,        {{ElementType::Carbon,   1}, {ElementType::Oxygen, 2}}},
+    {GasType::WaterVapor,           {{ElementType::Hydrogen, 2}, {ElementType::Oxygen, 1}}},
+    {GasType::Methane,              {{ElementType::Carbon,   1}, {ElementType::Hydrogen, 4}}},
+    {GasType::Ammonia,              {{ElementType::Nitrogen, 1}, {ElementType::Hydrogen, 3}}},
+    {GasType::SulfurDioxide,        {{ElementType::Sulfur,   1}, {ElementType::Oxygen, 2}}},
+    {GasType::ChlorineGas,          {{ElementType::Chlorine, 2}}},
+    {GasType::NeonGas,              {{ElementType::Neon,     1}}},
+    {GasType::ArgonGas,             {{ElementType::Argon,    1}}},
+    {GasType::KryptonGas,           {{ElementType::Krypton,  1}}},
+    {GasType::XenonGas,             {{ElementType::Xenon,    1}}},
+    {GasType::RadonGas,             {{ElementType::Radon,    1}}},
+    {GasType::CarbonMonoxide,       {{ElementType::Carbon,   1}, {ElementType::Oxygen, 1}}},
+    {GasType::Ozone,                {{ElementType::Oxygen, 3}}},
+    {GasType::NitrousOxide,         {{ElementType::Nitrogen, 2}, {ElementType::Oxygen, 1}}},
+    {GasType::HydrogenSulfide,      {{ElementType::Hydrogen, 2}, {ElementType::Sulfur, 1}}},
+    {GasType::Phosgene,             {{ElementType::Carbon,   1}, {ElementType::Oxygen, 1}, {ElementType::Chlorine, 2}}},
+    {GasType::Ethylene,             {{ElementType::Carbon,   2}, {ElementType::Hydrogen, 4}}},
+    {GasType::Acetylene,            {{ElementType::Carbon,   2}, {ElementType::Hydrogen, 2}}},
+    {GasType::Propane,              {{ElementType::Carbon,   3}, {ElementType::Hydrogen, 8}}},
+    {GasType::TungstenHexafluoride, {{ElementType::Tungsten, 1}, {ElementType::Fluorine, 6}}},
+    {GasType::Butane,               {{ElementType::Carbon,   4}, {ElementType::Hydrogen, 10}}},
+    {GasType::UraniumHexafluoride,  {{ElementType::Uranium,  1}, {ElementType::Fluorine, 6}}},
+    {GasType::Pentane,              {{ElementType::Carbon,   5}, {ElementType::Hydrogen, 12}}},
+    {GasType::Hexane,               {{ElementType::Carbon,   6}, {ElementType::Hydrogen, 14}}},
+    {GasType::Heptane,              {{ElementType::Carbon,   7}, {ElementType::Hydrogen, 16}}},
+    {GasType::Octane,               {{ElementType::Carbon,   8}, {ElementType::Hydrogen, 18}}},
 };
 
 inline float calculateMolarMass(const std::map<ElementType, int>& _elements) {

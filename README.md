@@ -228,13 +228,16 @@ Table of gases and their $a$ and $b$ values (convert to SI before use, see above
 | Xenon | Xe | 4.250 | 0.05105 |
 | Radon | Rn | 6.601 | 0.06239 |
 | Carbon Monoxide | CO | 1.505 | 0.03985 |
+| Ozone | O₃ | 3.545 | 0.0487 |
 | Nitrous Oxide | N₂O | 3.832 | 0.04415 |
 | Hydrogen Sulfide | H₂S | 4.544 | 0.04339 |
 | Phosgene | COCl₂ | 9.171 | 0.0831 |
 | Ethylene | C₂H₄ | 4.612 | 0.0582 |
 | Acetylene | C₂H₂ | 4.516 | 0.0522 |
 | Propane | C₃H₈ | 8.779 | 0.08445 |
+| Tungsten Hexafluoride | WF₆ | 13.25 | 0.1063
 | Butane | C₄H₁₀ | 14.66 | 0.1226 |
+| Uranium Hexafluoride | UF₆ | 16.01 | 0.1128 |
 | Pentane | C₅H₁₂ | 19.26 | 0.146 |
 | Hexane | C₆H₁₄ | 24.71 | 0.1735 |
 | Heptane | C₇H₁₆ | 31.06 | 0.2049 |

@@ -6,14 +6,31 @@
 #define IDEAL_GAS_LAW_RENDERER_H
 #include <glm/vec2.hpp>
 
+#include <GL/glew.h>
+#include <glfw/glfw3.h>
+
+#include "Camera.h"
+#include "Scene.h"
 #include "../WorldSettings.h"
 #include "../objects/SoftBody.h"
 
 class Renderer {
 public:
-    WorldSettings world;
-    SoftBody softBody;
-};
+    void Initialize();
+    void GameLoop();
 
+private:
+    std::unique_ptr<Scene> scene;
+    Camera camera;
+
+    GLFWwindow *window;
+
+    float deltaTime;
+    float lastFrameTime;
+    int frameCount;
+    int fpsTimer;
+
+    static void CursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
+};
 
 #endif //IDEAL_GAS_LAW_RENDERER_H
